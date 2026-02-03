@@ -33,6 +33,7 @@ export async function middleware(request: NextRequest) {
     // Protect these routes
     const protectedRoutes =
         path.startsWith("/dashboard") ||
+        path.startsWith("/jobs") ||
         path.startsWith("/seal") ||
         path.startsWith("/test-upload");
 
@@ -53,5 +54,17 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/seal/:path*", "/test-upload", "/login"],
-};
+    matcher: [
+      "/dashboard",
+      "/dashboard/:path*",
+      "/jobs",
+      "/jobs/:path*",
+      "/seal",
+      "/seal/:path*",
+      "/test-upload",
+      "/login",
+    ],
+  };
+  
+  
+
