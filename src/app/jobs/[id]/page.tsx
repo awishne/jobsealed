@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { JobEditForm } from "./JobEditForm";
 import { JobPhotoUploader } from "@/components/jobs/JobPhotoUploader";
+import { SealJobButton } from "@/components/jobs/SealJobButton";
 import type { JobStatus } from "@/types/database";
 
 const BUCKET = "job-photos";
@@ -169,6 +170,8 @@ export default async function JobDetailPage({
             )}
           </CardContent>
         </Card>
+
+        <SealJobButton jobId={jobRow.id} currentStatus={jobRow.status} />
 
         <JobPhotoUploader jobId={jobRow.id} />
 
