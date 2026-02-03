@@ -115,6 +115,51 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/* JobSealed hero headline: transform + opacity only (no layout changes). Respects prefers-reduced-motion. */
+@keyframes js-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+@keyframes js-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px) translateZ(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateZ(0);
+  }
+}
+
+.js-word-left {
+  display: inline-block;
+  will-change: transform;
+  animation: js-slide-in-left 0.6s ease-out forwards;
+}
+
+.js-word-right {
+  display: inline-block;
+  will-change: transform;
+  animation: js-slide-in-right 0.6s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js-word-left,
+  .js-word-right {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
