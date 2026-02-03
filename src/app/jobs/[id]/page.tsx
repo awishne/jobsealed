@@ -11,7 +11,19 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { JobEditForm } from "./JobEditForm";
+import { JobPhotoUploader } from "@/components/jobs/JobPhotoUploader";
 import type { JobStatus } from "@/types/database";
+
+const BUCKET = "job-photos";
+const SIGNED_URL_EXPIRES_IN = 3600;
+
+interface JobPhotoRow {
+  id: string;
+  job_id: string;
+  storage_path: string;
+  photo_type: string;
+  created_at: string;
+}
 
 interface JobRow {
   id: string;
@@ -67,6 +79,42 @@ export default async function JobDetailPage({
 
   const customerName = jobRow.customers?.name ?? "Unknown customer";
 
+  const { data: photosData } = await supabase
+    .from("job_photos")
+    .select("id, storage_path, photo_type, created_at")
+    .eq("job_id", id)
+    .order("created_at", { ascending: true });
+
+  const photos = (photosData ?? []) as JobPhotoRow[];
+  const paths = photos.map((p) => p.storage_path);
+  const pathToUrl: Record<string, string> = {};
+
+  if (paths.length > 0) {
+    const bucket = supabase.storage.from(BUCKET);
+    const { data: signedData } = await bucket.createSignedUrls(
+      paths,
+      SIGNED_URL_EXPIRES_IN
+    );
+    if (signedData) {
+      for (const item of signedData) {
+        if (item.path != null && item.signedUrl) {
+          pathToUrl[item.path] = item.signedUrl;
+        }
+      }
+    } else {
+      for (const path of paths) {
+        const { data: single } = await bucket.createSignedUrl(
+          path,
+          SIGNED_URL_EXPIRES_IN
+        );
+        if (single?.signedUrl) pathToUrl[path] = single.signedUrl;
+      }
+    }
+  }
+
+  const beforePhotos = photos.filter((p) => p.photo_type === "before");
+  const afterPhotos = photos.filter((p) => p.photo_type === "after");
+
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-2xl px-6 py-12">
@@ -121,6 +169,66 @@ export default async function JobDetailPage({
             )}
           </CardContent>
         </Card>
+
+        <JobPhotoUploader jobId={jobRow.id} />
+
+        {beforePhotos.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Before</CardTitle>
+              <CardDescription>Photos before the job.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                {beforePhotos.map((p) => {
+                  const url = pathToUrl[p.storage_path];
+                  if (!url) return null;
+                  return (
+                    <div
+                      key={p.id}
+                      className="aspect-square overflow-hidden rounded-lg border bg-muted"
+                    >
+                      <img
+                        src={url}
+                        alt="Before"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {afterPhotos.length > 0 && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>After</CardTitle>
+              <CardDescription>Photos after the job.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                {afterPhotos.map((p) => {
+                  const url = pathToUrl[p.storage_path];
+                  if (!url) return null;
+                  return (
+                    <div
+                      key={p.id}
+                      className="aspect-square overflow-hidden rounded-lg border bg-muted"
+                    >
+                      <img
+                        src={url}
+                        alt="After"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <JobEditForm
           jobId={jobRow.id}
