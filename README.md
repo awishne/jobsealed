@@ -2,6 +2,18 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+NEXT_PUBLIC_DEMO_REPORT_TOKEN=your-demo-report-token-here
+```
+
+Set `NEXT_PUBLIC_DEMO_REPORT_TOKEN` to a valid report token to enable the demo report link on the homepage. If not set, the demo button will be disabled.
+
+### Running the Development Server
+
 First, run the development server:
 
 ```bash

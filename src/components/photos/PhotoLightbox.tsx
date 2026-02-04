@@ -1,0 +1,73 @@
+"use client";
+
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
+export interface PhotoLightboxImage {
+  id: string;
+  url: string;
+  caption?: string | null;
+}
+
+interface PhotoLightboxProps {
+  images: PhotoLightboxImage[];
+}
+
+export function PhotoLightbox({ images }: PhotoLightboxProps) {
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
+  const selectedImage = images.find((img) => img.id === selectedImageId);
+
+  if (images.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+        {images.map((image) => (
+          <button
+            key={image.id}
+            onClick={() => setSelectedImageId(image.id)}
+            className="group relative aspect-square overflow-hidden rounded-lg border bg-muted transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          >
+            <img
+              src={image.url}
+              alt={image.caption ?? "Photo"}
+              className="h-full w-full object-cover"
+            />
+          </button>
+        ))}
+      </div>
+
+      <Dialog
+        open={selectedImageId !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSelectedImageId(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-4xl p-0">
+          {selectedImage && (
+            <div className="relative">
+              <img
+                src={selectedImage.url}
+                alt={selectedImage.caption ?? "Photo"}
+                className="w-full max-h-[80vh] object-contain"
+              />
+              {selectedImage.caption && (
+                <DialogDescription className="p-4 text-center text-sm">
+                  {selectedImage.caption}
+                </DialogDescription>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

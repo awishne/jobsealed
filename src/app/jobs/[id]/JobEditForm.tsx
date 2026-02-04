@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ShareReportButtonWrapper } from "@/components/jobs/ShareReportButtonWrapper";
 import type { JobStatus } from "@/types/database";
 
 const STATUS_OPTIONS: { value: JobStatus; label: string }[] = [
@@ -27,6 +28,7 @@ interface JobEditFormProps {
   initialNotes: string | null;
   initialStatus: JobStatus;
   publicToken: string | null;
+  shareTitle?: string;
 }
 
 export function JobEditForm({
@@ -34,6 +36,7 @@ export function JobEditForm({
   initialNotes,
   initialStatus,
   publicToken,
+  shareTitle,
 }: JobEditFormProps) {
   const router = useRouter();
   const [notes, setNotes] = useState(initialNotes ?? "");
@@ -137,14 +140,22 @@ export function JobEditForm({
               <p className="font-mono text-sm text-muted-foreground">
                 /r/{publicToken}
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCopyShareLink}
-              >
-                {copied ? "Copied" : "Copy full URL"}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyShareLink}
+                >
+                  {copied ? "Copied" : "Copy full URL"}
+                </Button>
+                {shareTitle && (
+                  <ShareReportButtonWrapper
+                    publicToken={publicToken}
+                    title={shareTitle}
+                  />
+                )}
+              </div>
             </>
           ) : (
             <p className="text-sm text-muted-foreground">

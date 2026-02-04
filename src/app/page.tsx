@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Camera, FileCheck, Share2 } from "lucide-react";
 import Link from "next/link";
 
-const DEMO_REPORT_TOKEN = "demo-token";
+const DEMO = process.env.NEXT_PUBLIC_DEMO_REPORT_TOKEN;
 
 export default async function Home() {
   const supabase = await createClient();
@@ -33,6 +33,9 @@ export default async function Home() {
               <>
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/dashboard">Dashboard</Link>
+                </Button>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/profile">Profile</Link>
                 </Button>
                 <LogoutButton />
               </>
@@ -64,11 +67,22 @@ export default async function Home() {
               <Button asChild size="lg">
                 <Link href="/dashboard">Start a new job</Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href={`/r/${DEMO_REPORT_TOKEN}`}>
-                  See an example report
-                </Link>
-              </Button>
+              {DEMO ? (
+                <Button asChild size="lg" variant="outline">
+                  <Link href={`/r/${DEMO}`}>
+                    See an example report
+                  </Link>
+                </Button>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  <Button size="lg" variant="outline" disabled>
+                    See an example report
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Demo report coming soon
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </section>

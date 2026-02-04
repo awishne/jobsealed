@@ -35,7 +35,8 @@ export async function middleware(request: NextRequest) {
         path.startsWith("/dashboard") ||
         path.startsWith("/jobs") ||
         path.startsWith("/seal") ||
-        path.startsWith("/test-upload");
+        path.startsWith("/test-upload") ||
+        path.startsWith("/profile");
 
     if (!user && protectedRoutes) {
         const url = request.nextUrl.clone();
@@ -62,6 +63,8 @@ export const config = {
       "/seal",
       "/seal/:path*",
       "/test-upload",
+      "/profile",
+      "/profile/:path*",
       "/login",
     ],
   };
