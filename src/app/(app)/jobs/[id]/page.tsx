@@ -14,7 +14,7 @@ import { JobEditForm } from "./JobEditForm";
 import { JobPhotoUploader } from "@/components/jobs/JobPhotoUploader";
 import { JobPhotoGrid } from "@/components/jobs/JobPhotoGrid";
 import { SealJobButton } from "@/components/jobs/SealJobButton";
-import { PhotoLightbox } from "@/components/photos/PhotoLightbox";
+import { JobPhotoGallery } from "@/components/jobs/JobPhotoGallery";
 import type { JobStatus } from "@/types/database";
 
 const BUCKET = "job-photos";
@@ -203,7 +203,8 @@ export default async function JobDetailPage({
             <CardDescription>Photos before the job.</CardDescription>
           </CardHeader>
           <CardContent>
-            <PhotoLightbox
+            <JobPhotoGallery
+              jobId={jobRow.id}
               images={beforePhotosWithUrls.map((p) => ({
                 id: p.id,
                 url: p.signedUrl!,
@@ -221,7 +222,8 @@ export default async function JobDetailPage({
             <CardDescription>Photos after the job.</CardDescription>
           </CardHeader>
           <CardContent>
-            <PhotoLightbox
+            <JobPhotoGallery
+              jobId={jobRow.id}
               images={afterPhotosWithUrls.map((p) => ({
                 id: p.id,
                 url: p.signedUrl!,

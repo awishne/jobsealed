@@ -15,9 +15,10 @@ export interface PhotoLightboxImage {
 
 interface PhotoLightboxProps {
   images: PhotoLightboxImage[];
+  renderThumbnailActions?: (image: PhotoLightboxImage) => React.ReactNode;
 }
 
-export function PhotoLightbox({ images }: PhotoLightboxProps) {
+export function PhotoLightbox({ images, renderThumbnailActions }: PhotoLightboxProps) {
   const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const selectedImage = images.find((img) => img.id === selectedImageId);
 
@@ -39,6 +40,16 @@ export function PhotoLightbox({ images }: PhotoLightboxProps) {
               alt={image.caption ?? "Photo"}
               className="h-full w-full object-cover"
             />
+            {renderThumbnailActions && (
+              <div
+                className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-100">
+                  {renderThumbnailActions(image)}
+                </div>
+              </div>
+            )}
           </button>
         ))}
       </div>
