@@ -12,8 +12,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { ShareReportButtonWrapper } from "@/components/jobs/ShareReportButtonWrapper";
+import { VoiceInput } from "@/components/jobs/VoiceInput";
 import type { JobStatus } from "@/types/database";
 
 const STATUS_OPTIONS: { value: JobStatus; label: string }[] = [
@@ -93,14 +95,27 @@ export function JobEditForm({
               <label htmlFor="edit-notes" className="text-sm font-medium">
                 Notes
               </label>
-              <Textarea
-                id="edit-notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Job notes…"
-                rows={3}
-                disabled={saving}
-              />
+              <div className="relative">
+                <Textarea
+                  id="edit-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Job notes…"
+                  rows={3}
+                  disabled={saving}
+                  className={cn("pr-14 pb-14")}
+                />
+                <div className="absolute bottom-2 right-2 z-10 flex items-center gap-2">
+                  <VoiceInput
+                    onTranscription={(text) => {
+                      setNotes((prev) =>
+                        prev.trim() ? `${prev.trim()}\n\n${text}` : text
+                      );
+                    }}
+                    disabled={saving}
+                  />
+                </div>
+              </div>
             </div>
             <div className="space-y-2">
               <label htmlFor="edit-status" className="text-sm font-medium">

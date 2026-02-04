@@ -30,27 +30,28 @@ export function PhotoLightbox({ images, renderThumbnailActions }: PhotoLightboxP
     <>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
         {images.map((image) => (
-          <button
+          <div
             key={image.id}
-            onClick={() => setSelectedImageId(image.id)}
-            className="group relative aspect-square overflow-hidden rounded-lg border bg-muted transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            className="group relative aspect-square overflow-hidden rounded-lg border bg-muted"
           >
-            <img
-              src={image.url}
-              alt={image.caption ?? "Photo"}
-              className="h-full w-full object-cover"
-            />
+            <button
+              type="button"
+              onClick={() => setSelectedImageId(image.id)}
+              className="absolute inset-0 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+              aria-label="View photo"
+            >
+              <img
+                src={image.url}
+                alt={image.caption ?? "Photo"}
+                className="h-full w-full object-cover transition-opacity hover:opacity-90"
+              />
+            </button>
             {renderThumbnailActions && (
-              <div
-                className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100 sm:opacity-100">
-                  {renderThumbnailActions(image)}
-                </div>
+              <div className="absolute right-2 top-2 z-10 flex gap-2 opacity-0 transition-opacity group-hover:opacity-100 pointer-events-auto">
+                {renderThumbnailActions(image)}
               </div>
             )}
-          </button>
+          </div>
         ))}
       </div>
 

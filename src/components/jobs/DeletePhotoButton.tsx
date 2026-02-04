@@ -58,14 +58,14 @@ export function DeletePhotoButton({ jobId, photoId }: DeletePhotoButtonProps) {
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
         <Button
+          type="button"
           variant="secondary"
           size="icon"
           className="h-8 w-8 bg-background/90 hover:bg-background"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          onClick={(e) => e.stopPropagation()}
         >
           <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Delete photo</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
