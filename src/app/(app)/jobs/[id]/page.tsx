@@ -208,7 +208,7 @@ export default async function JobDetailPage({
               images={beforePhotosWithUrls.map((p) => ({
                 id: p.id,
                 url: p.signedUrl!,
-                caption: p.caption,
+                caption: p.caption ?? undefined,
               }))}
             />
           </CardContent>
@@ -227,7 +227,7 @@ export default async function JobDetailPage({
               images={afterPhotosWithUrls.map((p) => ({
                 id: p.id,
                 url: p.signedUrl!,
-                caption: p.caption,
+                caption: p.caption ?? undefined,
               }))}
             />
           </CardContent>
