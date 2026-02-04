@@ -46,13 +46,13 @@ export function ProfileForm({
   const [businessName, setBusinessName] = useState(initialBusinessName ?? "");
   const [savingName, setSavingName] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [nameStatus, setNameStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [logoStatus, setLogoStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   async function handleSaveBusinessName(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    setNameStatus(null);
+    setLogoStatus(null);
     setSavingName(true);
 
     const { error: updateError } = await supabase
@@ -62,11 +62,11 @@ export function ProfileForm({
 
     setSavingName(false);
     if (updateError) {
-      setError(updateError.message);
+      setNameStatus({ type: "error", message: updateError.message });
       return;
     }
-    setSuccess("Company name saved successfully!");
-    setTimeout(() => setSuccess(null), 3000);
+    setNameStatus({ type: "success", message: "Company name saved successfully!" });
+    setTimeout(() => setNameStatus(null), 3000);
     router.refresh();
   }
 
@@ -74,19 +74,19 @@ export function ProfileForm({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setError(null);
-    setSuccess(null);
+    setNameStatus(null);
+    setLogoStatus(null);
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setError("File size must be less than 1MB");
+      setLogoStatus({ type: "error", message: "File size must be less than 1MB" });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setError("Please upload an image file");
+      setLogoStatus({ type: "error", message: "Please upload an image file" });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -105,7 +105,7 @@ export function ProfileForm({
       });
 
     if (uploadError) {
-      setError(uploadError.message);
+      setLogoStatus({ type: "error", message: uploadError.message });
       setUploadingLogo(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
@@ -118,15 +118,15 @@ export function ProfileForm({
       .eq("id", userId);
 
     if (updateError) {
-      setError(updateError.message);
+      setLogoStatus({ type: "error", message: updateError.message });
       setUploadingLogo(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     setUploadingLogo(false);
-    setSuccess("Logo uploaded successfully!");
-    setTimeout(() => setSuccess(null), 3000);
+    setLogoStatus({ type: "success", message: "Logo uploaded successfully!" });
+    setTimeout(() => setLogoStatus(null), 3000);
     if (fileInputRef.current) fileInputRef.current.value = "";
     router.refresh();
   }
@@ -142,14 +142,13 @@ export function ProfileForm({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {error && (
-              <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </p>
-            )}
-            {success && (
-              <p className="rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
-                {success}
+            {nameStatus && (
+              <p className={`rounded-md px-3 py-2 text-sm ${
+                nameStatus.type === "error"
+                  ? "bg-destructive/10 text-destructive"
+                  : "bg-green-500/10 text-green-600 dark:text-green-400"
+              }`}>
+                {nameStatus.message}
               </p>
             )}
             <div className="space-y-2">
@@ -181,14 +180,13 @@ export function ProfileForm({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {error && (
-            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {error}
-            </p>
-          )}
-          {success && (
-            <p className="rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-600 dark:text-green-400">
-              {success}
+          {logoStatus && (
+            <p className={`rounded-md px-3 py-2 text-sm ${
+              logoStatus.type === "error"
+                ? "bg-destructive/10 text-destructive"
+                : "bg-green-500/10 text-green-600 dark:text-green-400"
+            }`}>
+              {logoStatus.message}
             </p>
           )}
           <div className="space-y-2">

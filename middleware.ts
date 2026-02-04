@@ -28,24 +28,23 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    const path = request.nextUrl.pathname;
+    const pathname = request.nextUrl.pathname;
 
-    // Protect these routes
-    const protectedRoutes =
-        path.startsWith("/dashboard") ||
-        path.startsWith("/jobs") ||
-        path.startsWith("/seal") ||
-        path.startsWith("/test-upload") ||
-        path.startsWith("/profile");
+    // Protect these routes using prefix-based checks
+    // This ensures ALL nested routes are protected (e.g., /jobs/new, /jobs/123, etc.)
+    const PROTECTED_PREFIXES = ["/dashboard", "/jobs", "/profile", "/seal", "/test-upload"];
+    const isProtected = PROTECTED_PREFIXES.some(
+        (p) => pathname === p || pathname.startsWith(p + "/")
+    );
 
-    if (!user && protectedRoutes) {
+    if (!user && isProtected) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         return NextResponse.redirect(url);
     }
 
     // Keep logged-in users out of /login
-    if (user && path === "/login") {
+    if (user && pathname === "/login") {
         const url = request.nextUrl.clone();
         url.pathname = "/dashboard";
         return NextResponse.redirect(url);

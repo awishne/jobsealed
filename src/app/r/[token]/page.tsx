@@ -268,37 +268,38 @@ export default async function PublicReportPage({
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-lg px-4 py-6 sm:px-6">
-        {/* Company Branding Header */}
-        <div className="mb-4 flex items-center justify-between border-b pb-4">
+        {/* Brand Bar */}
+        <div className="mb-6 flex items-center justify-between border-b pb-4">
           <div className="flex items-center gap-3">
             {logoUrl && (
               <img
                 src={logoUrl}
                 alt={`${businessName} logo`}
-                className="h-10 w-auto object-contain"
+                className="h-14 w-14 md:h-20 md:w-20 shrink-0 rounded-full bg-white shadow-sm object-cover"
               />
             )}
-            <h2 className="text-lg font-semibold">{businessName}</h2>
+            <h2 className="text-2xl font-semibold leading-tight md:text-3xl">{businessName}</h2>
           </div>
         </div>
 
         <Card>
           <CardHeader className="gap-2">
-            <p className="text-sm text-muted-foreground">{customer.name}</p>
-            <CardTitle className="text-xl">
-              {jobRow.title ?? "Untitled job"}
-            </CardTitle>
-            <Badge variant="secondary" className="w-fit capitalize">
-              {jobRow.status}
-            </Badge>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-xl font-semibold md:text-2xl">
+                  {jobRow.title ?? "Untitled job"}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {customer.name}
+                  {jobRow.address && ` · ${jobRow.address}`}
+                </p>
+              </div>
+              <Badge variant="secondary" className="w-fit shrink-0 capitalize">
+                {jobRow.status}
+              </Badge>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {jobRow.address ? (
-              <p className="text-sm">
-                <span className="font-medium">Address:</span>{" "}
-                {jobRow.address}
-              </p>
-            ) : null}
             {jobRow.notes ? (
               <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                 {jobRow.notes}

@@ -1,4 +1,4 @@
-import { LogoutButton } from "@/components/auth/LogoutButton";
+import { SiteHeader } from "@/components/nav/SiteHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,45 +8,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
 import { Camera, FileCheck, Share2 } from "lucide-react";
 import Link from "next/link";
 
 const DEMO = process.env.NEXT_PUBLIC_DEMO_REPORT_TOKEN;
 
 export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   return (
     <main className="min-h-screen bg-background">
-      {/* Navbar */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-6">
-          <Link href="/" className="font-semibold tracking-tight">
-            JobSealed
-          </Link>
-          <nav className="flex items-center gap-2">
-            {user ? (
-              <>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/dashboard">Dashboard</Link>
-                </Button>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/profile">Profile</Link>
-                </Button>
-                <LogoutButton />
-              </>
-            ) : (
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/login">Login</Link>
-              </Button>
-            )}
-          </nav>
-        </div>
-      </header>
+      <SiteHeader variant="home" />
 
       <div className="mx-auto max-w-5xl px-6">
         {/* Hero */}
