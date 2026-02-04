@@ -33,12 +33,14 @@ interface ProfileFormProps {
   initialBusinessName: string | null;
   userId: string;
   initialLogoUrl: string | null; // storage path
+  initialReviewUrl: string | null;
 }
 
 export function ProfileForm({
   initialBusinessName,
   userId,
   initialLogoUrl,
+  initialReviewUrl,
 }: ProfileFormProps) {
   const router = useRouter();
   const supabase = createClient();
@@ -46,8 +48,11 @@ export function ProfileForm({
   const [businessName, setBusinessName] = useState(initialBusinessName ?? "");
   const [savingName, setSavingName] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [reviewUrl, setReviewUrl] = useState(initialReviewUrl ?? "");
+  const [savingReview, setSavingReview] = useState(false);
   const [nameStatus, setNameStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [logoStatus, setLogoStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [reviewStatus, setReviewStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   async function handleSaveBusinessName(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -131,6 +136,37 @@ export function ProfileForm({
     router.refresh();
   }
 
+  async function handleSaveReviewUrl(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setReviewStatus(null);
+    setNameStatus(null);
+    setLogoStatus(null);
+    
+    const trimmedUrl = reviewUrl.trim();
+    
+    // Validate URL if non-empty
+    if (trimmedUrl && !trimmedUrl.startsWith("http://") && !trimmedUrl.startsWith("https://")) {
+      setReviewStatus({ type: "error", message: "URL must start with http:// or https://" });
+      return;
+    }
+    
+    setSavingReview(true);
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ review_url: trimmedUrl || null })
+      .eq("id", userId);
+
+    setSavingReview(false);
+    if (updateError) {
+      setReviewStatus({ type: "error", message: updateError.message });
+      return;
+    }
+    setReviewStatus({ type: "success", message: "Review link saved successfully!" });
+    setTimeout(() => setReviewStatus(null), 3000);
+    router.refresh();
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -209,6 +245,44 @@ export function ProfileForm({
             </Button>
           </div>
         </CardContent>
+      </Card>
+
+      <Card>
+        <form onSubmit={handleSaveReviewUrl}>
+          <CardHeader>
+            <CardTitle>Review Link (Optional)</CardTitle>
+            <CardDescription>
+              Add your Google Business (or Yelp) review link. Customers will see a 'Leave a review' button on every report.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {reviewStatus && (
+              <p className={`rounded-md px-3 py-2 text-sm ${
+                reviewStatus.type === "error"
+                  ? "bg-destructive/10 text-destructive"
+                  : "bg-green-500/10 text-green-600 dark:text-green-400"
+              }`}>
+                {reviewStatus.message}
+              </p>
+            )}
+            <div className="space-y-2">
+              <label htmlFor="review-url" className="text-sm font-medium">
+                Review Link (Optional)
+              </label>
+              <Input
+                id="review-url"
+                type="url"
+                value={reviewUrl}
+                onChange={(e) => setReviewUrl(e.target.value)}
+                placeholder="https://g.page/r/..."
+                disabled={savingReview}
+              />
+            </div>
+            <Button type="submit" disabled={savingReview}>
+              {savingReview ? "Saving…" : "Save Review Link"}
+            </Button>
+          </CardContent>
+        </form>
       </Card>
     </div>
   );

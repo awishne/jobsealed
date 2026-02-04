@@ -19,6 +19,7 @@ interface ProfileRow {
   id: string;
   business_name: string | null;
   logo_url: string | null;
+  review_url: string | null;
 }
 
 export default async function ProfilePage() {
@@ -35,7 +36,7 @@ export default async function ProfilePage() {
   // Fetch profile, create if doesn't exist
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, business_name, logo_url")
+    .select("id, business_name, logo_url, review_url")
     .eq("id", user.id)
     .single();
 
@@ -44,7 +45,7 @@ export default async function ProfilePage() {
     const { data: newProfile, error: insertError } = await supabase
       .from("profiles")
       .insert({ id: user.id })
-      .select("id, business_name, logo_url")
+      .select("id, business_name, logo_url, review_url")
       .single();
 
     if (insertError || !newProfile) {
@@ -74,6 +75,7 @@ export default async function ProfilePage() {
           initialBusinessName={profileRow.business_name}
           userId={user.id}
           initialLogoUrl={profileRow.logo_url}
+          initialReviewUrl={profileRow.review_url}
         />
       </div>
     );
@@ -137,6 +139,7 @@ export default async function ProfilePage() {
         initialBusinessName={profileRow.business_name}
         userId={user.id}
         initialLogoUrl={profileRow.logo_url}
+        initialReviewUrl={profileRow.review_url}
       />
     </div>
   );

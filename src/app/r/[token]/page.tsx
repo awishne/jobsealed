@@ -9,7 +9,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PhotoLightbox } from "@/components/photos/PhotoLightbox";
+import { Star } from "lucide-react";
 import type { JobStatus } from "@/types/database";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +41,7 @@ interface ProfileRow {
   id: string;
   business_name: string | null;
   logo_url: string | null;
+  review_url: string | null;
 }
 
 interface JobPhotoRow {
@@ -95,7 +98,7 @@ export async function generateMetadata({
   // Fetch user profile for branding in metadata
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("id, business_name, logo_url")
+    .select("id, business_name, logo_url, review_url")
     .eq("id", jobRow.user_id)
     .single();
 
@@ -245,7 +248,7 @@ export default async function PublicReportPage({
   // Fetch user profile for branding
   const { data: profileData } = await supabase
     .from("profiles")
-    .select("id, business_name, logo_url")
+    .select("id, business_name, logo_url, review_url")
     .eq("id", jobRow.user_id)
     .single();
 
@@ -336,6 +339,36 @@ export default async function PublicReportPage({
             Created {formatDate(jobRow.created_at)}
           </CardFooter>
         </Card>
+
+        {profile?.review_url && profile.review_url.trim() !== "" && (
+          <div className="mt-10 rounded-xl border bg-muted/40 p-6 text-center">
+            <div className="mb-3 flex items-center justify-center gap-1">
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+              <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+            </div>
+            <h3 className="mb-2 text-lg font-semibold">Happy with the work?</h3>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Reviews help small businesses a lot. It takes 30 seconds.
+            </p>
+            <Button
+              asChild
+              size="lg"
+              className="mx-auto"
+            >
+              <a
+                href={profile.review_url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Star className="mr-2 h-4 w-4" />
+                Leave a review
+              </a>
+            </Button>
+          </div>
+        )}
       </div>
     </main>
   );
