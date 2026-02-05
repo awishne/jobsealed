@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Mic, Square, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const MAX_RECORDING_MS = 3 * 60 * 1000; // 3 minutes
 
@@ -24,9 +25,18 @@ function canUseMediaRecorder(): boolean {
 export interface VoiceInputProps {
   onTranscription: (text: string) => void;
   disabled?: boolean;
+  /** When true, render only the button (no timer, no error) for use inside a compact pill. */
+  compact?: boolean;
+  /** Optional class for the button when compact (e.g. pill styling). */
+  buttonClassName?: string;
 }
 
-export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProps) {
+export function VoiceInput({
+  onTranscription,
+  disabled = false,
+  compact = false,
+  buttonClassName,
+}: VoiceInputProps) {
   const [state, setState] = useState<"idle" | "recording" | "processing">("idle");
   const [error, setError] = useState<string | null>(null);
   const [timerMs, setTimerMs] = useState(0);
@@ -184,6 +194,58 @@ export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProp
   const recordingLabel = "Stop recording";
   const transcribingLabel = "Transcribing…";
 
+  const buttonEl = (
+    <div className="relative">
+      {isRecording && !compact && (
+        <span
+          className="absolute inset-0 rounded-full ring-2 ring-destructive/40 animate-pulse"
+          aria-hidden
+        />
+      )}
+      <Button
+        type="button"
+        variant={isRecording ? "destructive" : "secondary"}
+        size="icon"
+        className={cn(
+          "relative shrink-0 touch-manipulation rounded-full",
+          compact ? "h-10 w-10 text-muted-foreground hover:bg-muted" : "h-11 w-11 shadow-sm",
+          buttonClassName
+        )}
+        disabled={isDisabled}
+        onClick={isRecording ? stopRecording : handleIdleClick}
+        title={isRecording ? recordingLabel : state === "processing" ? transcribingLabel : idleLabel}
+        aria-label={isRecording ? recordingLabel : state === "processing" ? transcribingLabel : idleLabel}
+      >
+        {state === "processing" ? (
+          <Loader2 className="size-5 shrink-0 animate-spin" aria-hidden />
+        ) : isRecording ? (
+          <Square className="size-5 shrink-0 fill-current" aria-hidden />
+        ) : (
+          <Mic className="size-5 shrink-0" aria-hidden />
+        )}
+      </Button>
+    </div>
+  );
+
+  if (compact) {
+    return (
+      <>
+        {buttonEl}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="audio/*"
+          capture="user"
+          className="hidden"
+          aria-hidden
+          tabIndex={-1}
+          disabled={isDisabled}
+          onChange={handleFileSelect}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="flex flex-col items-end gap-1">
       <div className="flex items-center gap-2">
@@ -195,32 +257,7 @@ export function VoiceInput({ onTranscription, disabled = false }: VoiceInputProp
             {formatTimer(timerMs)}
           </span>
         )}
-        <div className="relative">
-          {isRecording && (
-            <span
-              className="absolute inset-0 rounded-full ring-2 ring-destructive/40 animate-pulse"
-              aria-hidden
-            />
-          )}
-          <Button
-            type="button"
-            variant={isRecording ? "destructive" : "ghost"}
-            size="icon"
-            className="relative h-11 w-11 shrink-0 touch-manipulation rounded-full sm:h-10 sm:w-10"
-            disabled={isDisabled}
-            onClick={isRecording ? stopRecording : handleIdleClick}
-            title={isRecording ? recordingLabel : state === "processing" ? transcribingLabel : idleLabel}
-            aria-label={isRecording ? recordingLabel : state === "processing" ? transcribingLabel : idleLabel}
-          >
-            {state === "processing" ? (
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-            ) : isRecording ? (
-              <Square className="h-4 w-4 shrink-0 fill-current" aria-hidden />
-            ) : (
-              <Mic className="h-5 w-5 shrink-0" aria-hidden />
-            )}
-          </Button>
-        </div>
+        {buttonEl}
       </div>
       {state === "processing" && (
         <span className="text-xs text-muted-foreground">{transcribingLabel}</span>

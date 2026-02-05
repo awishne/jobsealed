@@ -244,6 +244,8 @@ export default async function JobDetailPage({
             ? `${customerName} — ${jobRow.title || "Untitled job"} report`
             : undefined
         }
+        jobTitle={jobRow.title}
+        customerName={customerName}
       />
     </div>
   );
