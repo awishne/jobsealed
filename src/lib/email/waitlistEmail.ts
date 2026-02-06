@@ -21,9 +21,10 @@ export function renderWaitlistConfirmEmail(
   const subject = "You're on the JobSealed early access list";
 
   const origin = (siteUrl || "https://jobsealed.com").replace(/\/$/, "");
-  const logo2x = `${origin}/email-wordmark@2x.png`;
+  const logoUrl = `${origin}/email-wordmark.png`;
 
-  const wordmarkImg = `<img src="${escapeHtml(logo2x)}" width="140" style="display:block;border:0;outline:none;text-decoration:none;" alt="JobSealed" />`;
+  const wordmarkImg = `<img src="${escapeHtml(logoUrl)}" width="140" alt="JobSealed" style="display:block;border:0;outline:none;text-decoration:none;width:140px;max-width:100%;height:auto;" />`;
+  const earlyAccessLabel = `<span style="font-family:${EMAIL_FONT_STACK};font-size:12px;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;">Early Access</span>`;
 
   const html = `
 <!DOCTYPE html>
@@ -35,22 +36,25 @@ export function renderWaitlistConfirmEmail(
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;">
           <tr>
-            <td style="padding:32px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e5e7eb;margin-bottom:28px;padding-bottom:20px;">
+            <td style="padding:36px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e5e7eb;margin-bottom:28px;padding-bottom:16px;">
                 <tr>
                   <td align="left" style="vertical-align:middle;">
                     ${wordmarkImg}
                   </td>
+                  <td align="right" style="vertical-align:middle;width:1%;white-space:nowrap;">
+                    ${earlyAccessLabel}
+                  </td>
                 </tr>
               </table>
-              <h1 style="margin:0 0 24px;font-size:24px;font-weight:600;color:#111;line-height:1.3;">You're in 🎉</h1>
-              <p style="margin:0 0 24px;font-size:16px;line-height:1.65;color:#333;">Thanks for joining early access for ${escapeHtml(productName)}. We'll email you as soon as spots open.</p>
-              <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.65;color:#333;">
+              <h1 style="margin:0 0 12px;font-size:24px;font-weight:600;color:#111;line-height:1.3;">You're in 🎉</h1>
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.6;color:#333;">Thanks for joining JobSealed Early Access — we'll email you as soon as spots open.</p>
+              <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.6;color:#333;">
                 <li style="margin-bottom:10px;">Voice notes → customer-ready wording</li>
                 <li style="margin-bottom:10px;">Professional, liability-aware phrasing</li>
                 <li style="margin-bottom:10px;">Branded reports (logo + review link)</li>
               </ul>
-              <p style="margin:0;font-size:13px;line-height:1.65;color:#666;">If you didn't request this, you can ignore this email.</p>
+              <p style="margin:0;font-size:13px;line-height:1.6;color:#666;">If you didn't request this, you can ignore this email.</p>
             </td>
           </tr>
         </table>
@@ -66,7 +70,7 @@ export function renderWaitlistConfirmEmail(
     "",
     "You're in 🎉",
     "",
-    `Thanks for joining early access for ${productName}. We'll email you as soon as spots open.`,
+    `Thanks for joining JobSealed Early Access — we'll email you as soon as spots open.`,
     "",
     "• Voice notes → customer-ready wording",
     "• Professional, liability-aware phrasing",

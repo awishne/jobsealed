@@ -140,7 +140,7 @@ export async function POST(request: Request) {
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ||
     process.env.SITE_URL ||
-    "https://jobsealed.com";
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
   // Only send emails on new join (not on already_joined)
   if (resendKey && from) {
