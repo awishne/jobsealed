@@ -21,12 +21,9 @@ export function renderWaitlistConfirmEmail(
   const subject = "You're on the JobSealed early access list";
 
   const origin = (siteUrl || "https://jobsealed.com").replace(/\/$/, "");
-  const logo1x = `${origin}/email-wordmark.png`;
   const logo2x = `${origin}/email-wordmark@2x.png`;
 
-  // Wordmark image (primary); muted text fallback when images are blocked
-  const wordmarkImg = `<img src="${escapeHtml(logo1x)}" srcset="${escapeHtml(logo2x)} 2x" width="140" style="display:block;border:0;outline:none;text-decoration:none;" alt="JobSealed" />`;
-  const wordmarkFallback = `<span style="font-family:${EMAIL_FONT_STACK};font-size:11px;color:#94a3b8;line-height:1.2;">JobSealed</span>`;
+  const wordmarkImg = `<img src="${escapeHtml(logo2x)}" width="140" style="display:block;border:0;outline:none;text-decoration:none;" alt="JobSealed" />`;
 
   const html = `
 <!DOCTYPE html>
@@ -43,7 +40,6 @@ export function renderWaitlistConfirmEmail(
                 <tr>
                   <td align="left" style="vertical-align:middle;">
                     ${wordmarkImg}
-                    ${wordmarkFallback}
                   </td>
                 </tr>
               </table>
