@@ -151,7 +151,7 @@ export async function POST(request: Request) {
       const confirm = renderWaitlistConfirmEmail({
         productName: PRODUCT_NAME,
         email,
-        logoUrl: `${siteUrl.replace(/\/$/, "")}/email-logo.png`,
+        siteUrl,
       });
       await resend.emails.send({
         from,

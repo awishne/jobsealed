@@ -4,48 +4,57 @@
 
 const PRODUCT_NAME = "JobSealed";
 
+// Email-safe font stack (no web fonts; system fallbacks only)
+const EMAIL_FONT_STACK =
+  "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, \"Apple Color Emoji\", \"Segoe UI Emoji\"";
+
 export type WaitlistConfirmParams = {
   productName: string;
   email: string;
-  logoUrl?: string;
+  siteUrl?: string;
 };
 
 export function renderWaitlistConfirmEmail(
   params: WaitlistConfirmParams
 ): { subject: string; html: string; text: string } {
-  const { productName, email, logoUrl } = params;
+  const { productName, email, siteUrl } = params;
   const subject = "You're on the JobSealed early access list";
 
-  let logoBlock = "";
-  if (logoUrl != null && logoUrl !== "") {
-    try {
-      const homepageUrl = new URL(logoUrl).origin;
-      logoBlock = `<a href="${escapeHtml(homepageUrl)}" style="display:block;text-align:center;text-decoration:none;"><img src="${escapeHtml(logoUrl)}" alt="JobSealed" width="140" height="auto" style="display:block;margin:0 auto 12px auto;width:140px;height:auto;border:0;" /></a>`;
-    } catch {
-      logoBlock = `<img src="${escapeHtml(logoUrl)}" alt="JobSealed" width="140" height="auto" style="display:block;margin:0 auto 12px auto;width:140px;height:auto;border:0;" />`;
-    }
-  }
+  const origin = (siteUrl || "https://jobsealed.com").replace(/\/$/, "");
+  const logo1x = `${origin}/email-wordmark.png`;
+  const logo2x = `${origin}/email-wordmark@2x.png`;
+
+  // Wordmark image (primary); muted text fallback when images are blocked
+  const wordmarkImg = `<img src="${escapeHtml(logo1x)}" srcset="${escapeHtml(logo2x)} 2x" width="140" style="display:block;border:0;outline:none;text-decoration:none;" alt="JobSealed" />`;
+  const wordmarkFallback = `<span style="font-family:${EMAIL_FONT_STACK};font-size:11px;color:#94a3b8;line-height:1.2;">JobSealed</span>`;
 
   const html = `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background-color:#f5f5f5;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:24px 16px;">
+<body style="margin:0;padding:0;font-family:${EMAIL_FONT_STACK};background-color:#f5f5f5;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:32px 20px;">
     <tr>
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;">
           <tr>
-            <td style="padding:32px 28px;">
-              ${logoBlock}
-              <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#111;">You're in 🎉</h1>
-              <p style="margin:0 0 20px;font-size:16px;line-height:1.5;color:#333;">Thanks for joining early access for ${escapeHtml(productName)}. We'll email you as soon as spots open.</p>
-              <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.6;color:#333;">
-                <li style="margin-bottom:6px;">Voice notes → customer-ready wording</li>
-                <li style="margin-bottom:6px;">Professional, liability-aware phrasing</li>
-                <li style="margin-bottom:6px;">Branded reports (logo + review link)</li>
+            <td style="padding:32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e5e7eb;margin-bottom:28px;padding-bottom:20px;">
+                <tr>
+                  <td align="left" style="vertical-align:middle;">
+                    ${wordmarkImg}
+                    ${wordmarkFallback}
+                  </td>
+                </tr>
+              </table>
+              <h1 style="margin:0 0 24px;font-size:24px;font-weight:600;color:#111;line-height:1.3;">You're in 🎉</h1>
+              <p style="margin:0 0 24px;font-size:16px;line-height:1.65;color:#333;">Thanks for joining early access for ${escapeHtml(productName)}. We'll email you as soon as spots open.</p>
+              <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.65;color:#333;">
+                <li style="margin-bottom:10px;">Voice notes → customer-ready wording</li>
+                <li style="margin-bottom:10px;">Professional, liability-aware phrasing</li>
+                <li style="margin-bottom:10px;">Branded reports (logo + review link)</li>
               </ul>
-              <p style="margin:0;font-size:13px;color:#666;">If you didn't request this, you can ignore this email.</p>
+              <p style="margin:0;font-size:13px;line-height:1.65;color:#666;">If you didn't request this, you can ignore this email.</p>
             </td>
           </tr>
         </table>
@@ -57,6 +66,8 @@ export function renderWaitlistConfirmEmail(
 `.trim();
 
   const text = [
+    "JobSealed",
+    "",
     "You're in 🎉",
     "",
     `Thanks for joining early access for ${productName}. We'll email you as soon as spots open.`,
