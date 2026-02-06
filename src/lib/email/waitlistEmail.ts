@@ -11,20 +11,16 @@ const EMAIL_FONT_STACK =
 export type WaitlistConfirmParams = {
   productName: string;
   email: string;
-  siteUrl?: string;
+  logoUrl: string;
 };
 
 export function renderWaitlistConfirmEmail(
   params: WaitlistConfirmParams
 ): { subject: string; html: string; text: string } {
-  const { productName, email, siteUrl } = params;
+  const { productName, email, logoUrl } = params;
   const subject = "You're on the JobSealed early access list";
 
-  const origin = (siteUrl || "https://jobsealed.com").replace(/\/$/, "");
-  const logoUrl = `${origin}/email-wordmark.png`;
-
   const wordmarkImg = `<img src="${escapeHtml(logoUrl)}" width="140" alt="JobSealed" style="display:block;border:0;outline:none;text-decoration:none;width:140px;max-width:100%;height:auto;" />`;
-  const earlyAccessLabel = `<span style="font-family:${EMAIL_FONT_STACK};font-size:12px;color:#6b7280;letter-spacing:0.08em;text-transform:uppercase;">Early Access</span>`;
 
   const html = `
 <!DOCTYPE html>
@@ -36,14 +32,11 @@ export function renderWaitlistConfirmEmail(
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;">
           <tr>
-            <td style="padding:36px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e5e7eb;margin-bottom:28px;padding-bottom:16px;">
+            <td style="padding:44px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e5e7eb;margin-bottom:36px;padding-bottom:16px;">
                 <tr>
                   <td align="left" style="vertical-align:middle;">
                     ${wordmarkImg}
-                  </td>
-                  <td align="right" style="vertical-align:middle;width:1%;white-space:nowrap;">
-                    ${earlyAccessLabel}
                   </td>
                 </tr>
               </table>
