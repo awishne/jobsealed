@@ -11,18 +11,16 @@ const EMAIL_FONT_STACK =
 export type WaitlistConfirmParams = {
   productName: string;
   email: string;
-  siteUrl: string;
+  logoUrl: string;
 };
 
 export function renderWaitlistConfirmEmail(
   params: WaitlistConfirmParams
 ): { subject: string; html: string; text: string } {
-  const { productName, email, siteUrl } = params;
+  const { productName, email, logoUrl } = params;
   const subject = "You're on the JobSealed early access list";
 
-  const wordmark1x = `${siteUrl}/email-wordmark.png`;
-  const wordmark2x = `${siteUrl}/email-wordmark@2x.png`;
-  const wordmarkImg = `<img src="${escapeHtml(wordmark2x)}" srcset="${escapeHtml(wordmark1x)} 1x, ${escapeHtml(wordmark2x)} 2x" width="140" alt="JobSealed" style="display:block;width:140px;height:auto;border:0;outline:none;text-decoration:none;max-width:100%;" />`;
+  const wordmarkImg = `<img src="${escapeHtml(logoUrl)}" width="140" alt="JobSealed" style="display:block;width:140px;max-width:140px;height:auto;border:0;outline:none;text-decoration:none;" />`;
 
   const preheader = "You're on the early access list — we'll email you when a spot opens.";
 
@@ -34,30 +32,30 @@ export function renderWaitlistConfirmEmail(
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(subject)}</title>
 </head>
-<body style="margin:0;padding:0;font-family:${EMAIL_FONT_STACK};background-color:#f5f5f5;line-height:1.55;">
+<body style="margin:0;padding:0;font-family:${EMAIL_FONT_STACK};background-color:#f5f5f5;line-height:1.6;">
   <div style="display:none;max-height:0;overflow:hidden;line-height:0;mso-hide:all;">${escapeHtml(preheader)}</div>
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:40px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f5;padding:32px;">
     <tr>
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;">
           <tr>
-            <td style="padding:36px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #e5e7eb;margin-bottom:36px;padding-bottom:16px;">
+            <td style="padding:32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
                 <tr>
                   <td align="left" style="vertical-align:middle;">
                     ${wordmarkImg}
                   </td>
                 </tr>
               </table>
-              <h1 style="margin:0 0 8px;font-size:24px;font-weight:600;color:#111;line-height:1.3;">You're in 🎉</h1>
-              <p style="margin:0 0 20px;font-size:15px;line-height:1.55;color:#666;">You're all set — keep an eye out for updates from hello@jobsealed.com.</p>
-              <p style="margin:0 0 24px;font-size:16px;line-height:1.55;color:#333;">Thanks for joining JobSealed — we'll email you as soon as spots open.</p>
-              <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.55;color:#333;">
-                <li style="margin-bottom:10px;">Voice notes → customer-ready wording</li>
-                <li style="margin-bottom:10px;">Professional, liability-aware phrasing</li>
-                <li style="margin-bottom:10px;">Branded reports (logo + review link)</li>
+              <h1 style="margin:0 0 12px;font-size:24px;font-weight:600;color:#111;line-height:1.3;">You're in 🎉</h1>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#666;">You're all set — keep an eye out for updates from hello@jobsealed.com.</p>
+              <p style="margin:0 0 28px;font-size:16px;line-height:1.6;color:#333;">Thanks for joining JobSealed — we'll email you as soon as spots open.</p>
+              <ul style="margin:0 0 28px;padding-left:20px;font-size:15px;line-height:1.6;color:#333;">
+                <li style="margin-bottom:12px;">Voice notes → customer-ready wording</li>
+                <li style="margin-bottom:12px;">Professional, liability-aware phrasing</li>
+                <li style="margin-bottom:12px;">Branded reports (logo + review link)</li>
               </ul>
-              <p style="margin:0;font-size:13px;line-height:1.55;color:#666;">If you didn't request this, you can ignore this email.</p>
+              <p style="margin:0;font-size:13px;line-height:1.6;color:#666;">If you didn't request this, you can ignore this email.</p>
             </td>
           </tr>
         </table>

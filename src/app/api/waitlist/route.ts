@@ -137,11 +137,13 @@ export async function POST(request: Request) {
 
   const createdAt = inserted?.created_at ?? new Date().toISOString();
 
-  // Used for absolute image URLs in confirmation email. Set SITE_URL=https://jobsealed.com on Vercel.
-  const siteUrl =
-    process.env.SITE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  // Used for absolute image URLs in confirmation email. Defaults to www.jobsealed.com for production.
+  // Locally: set SITE_URL=http://localhost:3000
+  // Production (Vercel): set SITE_URL=https://www.jobsealed.com
+  const siteUrlRaw =
+    process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://www.jobsealed.com";
+  const siteUrl = siteUrlRaw.replace(/\/$/, "");
+  const logoUrl = `${siteUrl}/email-wordmark@2x.png`;
 
   // Only send emails on new join (not on already_joined)
   if (resendKey && from) {
@@ -152,7 +154,7 @@ export async function POST(request: Request) {
       const confirm = renderWaitlistConfirmEmail({
         productName: PRODUCT_NAME,
         email,
-        siteUrl,
+        logoUrl,
       });
       await resend.emails.send({
         from,
