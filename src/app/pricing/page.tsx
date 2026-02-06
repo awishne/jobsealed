@@ -6,7 +6,7 @@ import { PricingCards } from "@/components/marketing/PricingCards";
 export const metadata: Metadata = {
   title: "Pricing — JobSealed",
   description:
-    "Free and Pro plans. Create closeout reports in minutes—photos, notes, Magic Mic, and clean-up tools.",
+    "Stop typing closeout reports. Talk your notes, polish in one tap, send customer-ready reports. Starter: 3 jobs/mo, typed notes. Pro $29/mo: voice notes, one-tap wording, branded reports.",
 };
 
 export default async function PricingPage() {
@@ -22,7 +22,7 @@ export default async function PricingPage() {
   return (
     <main className="min-h-screen bg-background">
       <SiteHeader />
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+      <div className="mx-auto max-w-5xl px-4 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-12">
         <PricingCards
           primaryCTAHref={primaryCTA.href}
           primaryCTALabel={primaryCTA.label}

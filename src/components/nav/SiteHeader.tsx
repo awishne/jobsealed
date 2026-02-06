@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { HeaderSignupCta } from "@/components/nav/HeaderSignupCta";
 
 interface SiteHeaderProps {
   variant?: "default" | "home";
@@ -24,6 +25,9 @@ export async function SiteHeader({ variant = "default" }: SiteHeaderProps) {
           </Link>
         )}
         <nav className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/pricing">Pricing</Link>
+          </Button>
           {user ? (
             <>
               <Button asChild variant="ghost" size="sm">
@@ -35,9 +39,12 @@ export async function SiteHeader({ variant = "default" }: SiteHeaderProps) {
               <LogoutButton />
             </>
           ) : (
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/login">Login</Link>
-            </Button>
+            <>
+              <HeaderSignupCta enableSignups={process.env.NEXT_PUBLIC_ENABLE_SIGNUPS === "true"} />
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/login">Login</Link>
+              </Button>
+            </>
           )}
         </nav>
       </div>
