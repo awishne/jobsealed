@@ -137,6 +137,11 @@ export async function POST(request: Request) {
 
   const createdAt = inserted?.created_at ?? new Date().toISOString();
 
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.SITE_URL ||
+    "https://jobsealed.com";
+
   // Only send emails on new join (not on already_joined)
   if (resendKey && from) {
     const resend = new Resend(resendKey);
@@ -146,6 +151,7 @@ export async function POST(request: Request) {
       const confirm = renderWaitlistConfirmEmail({
         productName: PRODUCT_NAME,
         email,
+        logoUrl: `${siteUrl.replace(/\/$/, "")}/email-logo.png`,
       });
       await resend.emails.send({
         from,

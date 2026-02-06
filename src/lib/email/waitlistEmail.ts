@@ -7,13 +7,24 @@ const PRODUCT_NAME = "JobSealed";
 export type WaitlistConfirmParams = {
   productName: string;
   email: string;
+  logoUrl?: string;
 };
 
 export function renderWaitlistConfirmEmail(
   params: WaitlistConfirmParams
 ): { subject: string; html: string; text: string } {
-  const { productName, email } = params;
+  const { productName, email, logoUrl } = params;
   const subject = "You're on the JobSealed early access list";
+
+  let logoBlock = "";
+  if (logoUrl != null && logoUrl !== "") {
+    try {
+      const homepageUrl = new URL(logoUrl).origin;
+      logoBlock = `<a href="${escapeHtml(homepageUrl)}" style="display:block;text-align:center;text-decoration:none;"><img src="${escapeHtml(logoUrl)}" alt="JobSealed" width="140" height="auto" style="display:block;margin:0 auto 12px auto;width:140px;height:auto;border:0;" /></a>`;
+    } catch {
+      logoBlock = `<img src="${escapeHtml(logoUrl)}" alt="JobSealed" width="140" height="auto" style="display:block;margin:0 auto 12px auto;width:140px;height:auto;border:0;" />`;
+    }
+  }
 
   const html = `
 <!DOCTYPE html>
@@ -26,6 +37,7 @@ export function renderWaitlistConfirmEmail(
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background-color:#ffffff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.06);overflow:hidden;">
           <tr>
             <td style="padding:32px 28px;">
+              ${logoBlock}
               <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;color:#111;">You're in 🎉</h1>
               <p style="margin:0 0 20px;font-size:16px;line-height:1.5;color:#333;">Thanks for joining early access for ${escapeHtml(productName)}. We'll email you as soon as spots open.</p>
               <ul style="margin:0 0 24px;padding-left:20px;font-size:15px;line-height:1.6;color:#333;">

@@ -8,9 +8,16 @@ Create a `.env.local` file in the root directory with the following variables:
 
 ```bash
 NEXT_PUBLIC_DEMO_REPORT_TOKEN=your-demo-report-token-here
+
+# Site URL for links and email assets (e.g. waitlist confirmation logo).
+# Local: SITE_URL=http://localhost:3000  or  NEXT_PUBLIC_SITE_URL=http://localhost:3000
+# Production (e.g. Vercel): SITE_URL=https://jobsealed.com
+SITE_URL=http://localhost:3000
 ```
 
 Set `NEXT_PUBLIC_DEMO_REPORT_TOKEN` to a valid report token to enable the demo report link on the homepage. If not set, the demo button will be disabled.
+
+Set `SITE_URL` or `NEXT_PUBLIC_SITE_URL` for absolute URLs in emails (e.g. the waitlist confirmation logo at `/email-logo.png`). In production, use `SITE_URL=https://jobsealed.com`.
 
 ### Running the Development Server
 
