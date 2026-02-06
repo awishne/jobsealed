@@ -27,13 +27,6 @@ const UTM_KEYS = [
 // In-memory rate limit: IP -> timestamps of requests in window
 const ipTimestamps = new Map<string, number[]>();
 
-function getRequestOrigin(req: Request) {
-  const xfHost = req.headers.get("x-forwarded-host");
-  const host = xfHost ?? req.headers.get("host") ?? "jobsealed.com";
-  const proto = req.headers.get("x-forwarded-proto") ?? "https";
-  return `${proto}://${host}`.replace(/\/$/, "");
-}
-
 function getClientIp(request: Request): string | null {
   const xff = request.headers.get("x-forwarded-for");
   if (xff) {
@@ -144,18 +137,22 @@ export async function POST(request: Request) {
 
   const createdAt = inserted?.created_at ?? new Date().toISOString();
 
+  // Used for absolute image URLs in confirmation email. Set SITE_URL=https://jobsealed.com on Vercel.
+  const siteUrl =
+    process.env.SITE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
   // Only send emails on new join (not on already_joined)
   if (resendKey && from) {
     const resend = new Resend(resendKey);
 
     // Confirmation email to signup
     try {
-      const origin = getRequestOrigin(request);
-      const logoUrl = new URL("/email-wordmark.png", origin).toString();
       const confirm = renderWaitlistConfirmEmail({
         productName: PRODUCT_NAME,
         email,
-        logoUrl,
+        siteUrl,
       });
       await resend.emails.send({
         from,
