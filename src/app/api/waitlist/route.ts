@@ -12,8 +12,8 @@ import {
 
 export const runtime = "nodejs";
 
-const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
-const MAX_REQUESTS_PER_IP = 5;
+const RATE_LIMIT_PER_WINDOW = 5;
+const RATE_LIMIT_WINDOW_SECONDS = 600;
 const PRODUCT_NAME = "JobSealed";
 
 const UTM_KEYS = [
@@ -23,9 +23,6 @@ const UTM_KEYS = [
   "utm_content",
   "utm_term",
 ] as const;
-
-// In-memory rate limit: IP -> timestamps of requests in window
-const ipTimestamps = new Map<string, number[]>();
 
 function getClientIp(request: Request): string | null {
   const xff = request.headers.get("x-forwarded-for");
@@ -38,14 +35,19 @@ function getClientIp(request: Request): string | null {
   return null;
 }
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const cutoff = now - WINDOW_MS;
-  let timestamps = ipTimestamps.get(ip) ?? [];
-  timestamps = timestamps.filter((t) => t > cutoff);
-  if (timestamps.length >= MAX_REQUESTS_PER_IP) return true;
-  timestamps.push(now);
-  ipTimestamps.set(ip, timestamps);
+function isAllowedOrigin(request: Request): boolean {
+  const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl) return true;
+  const base = siteUrl.replace(/\/$/, "").toLowerCase();
+  const origin = request.headers.get("origin")?.toLowerCase() ?? "";
+  const referer = request.headers.get("referer")?.toLowerCase() ?? "";
+  if (origin && origin.startsWith(base)) return true;
+  if (referer && referer.startsWith(base)) return true;
+  if (
+    origin.startsWith("http://localhost:3000") ||
+    referer.startsWith("http://localhost:3000")
+  )
+    return true;
   return false;
 }
 
@@ -73,11 +75,13 @@ function getUtmFromRequest(request: Request): Record<string, string | undefined>
 }
 
 export async function POST(request: Request) {
-  const ip = getClientIp(request);
-  if (ip && isRateLimited(ip)) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.SUPABASE_SERVICE_ROLE_KEY
+  ) {
     return NextResponse.json(
-      { ok: false, error: "Too many attempts. Try again later." },
-      { status: 429 }
+      { ok: false, error: "server_misconfigured" },
+      { status: 500 }
     );
   }
 
@@ -89,6 +93,45 @@ export async function POST(request: Request) {
       { ok: false, error: "Invalid JSON" },
       { status: 400 }
     );
+  }
+
+  if (!isAllowedOrigin(request)) {
+    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+  }
+
+  const ip = getClientIp(request);
+
+  const supabaseAdmin = createAdminClient();
+
+  if (ip !== null) {
+    const { data: rateLimitData, error: rateLimitError } = await supabaseAdmin.rpc(
+      "waitlist_rate_limit_hit",
+      {
+        p_ip: ip,
+        p_limit: RATE_LIMIT_PER_WINDOW,
+        p_window_seconds: RATE_LIMIT_WINDOW_SECONDS,
+      }
+    );
+    if (rateLimitError) {
+      console.error("waitlist_rate_limit_hit rpc error", rateLimitError);
+      return NextResponse.json(
+        { ok: false, error: "rate_limit_check_failed" },
+        { status: 500 }
+      );
+    }
+    const row = Array.isArray(rateLimitData) ? rateLimitData[0] : rateLimitData;
+    if (!row || typeof row.allowed !== "boolean") {
+      return NextResponse.json(
+        { ok: false, error: "rate_limit_check_failed" },
+        { status: 500 }
+      );
+    }
+    if (row.allowed === false) {
+      return NextResponse.json(
+        { ok: false, error: "rate_limited" },
+        { status: 429 }
+      );
+    }
   }
 
   const { email: rawEmail, source } = body as { email?: unknown; source?: unknown };
@@ -109,8 +152,6 @@ export async function POST(request: Request) {
   const from = process.env.RESEND_FROM ?? "JobSealed <hello@jobsealed.com>";
   const notifyTo = process.env.WAITLIST_NOTIFY_TO;
 
-  const supabase = createAdminClient();
-
   const row = {
     email,
     source: sourceStr ?? null,
@@ -118,7 +159,7 @@ export async function POST(request: Request) {
     user_agent: userAgent ?? null,
   };
 
-  const { data: inserted, error: insertError } = await supabase
+  const { data: inserted, error: insertError } = await supabaseAdmin
     .from("waitlist_signups")
     .insert(row)
     .select("id, created_at")
