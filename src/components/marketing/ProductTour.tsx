@@ -10,7 +10,7 @@ import {
   CardContent,
   CardHeader,
 } from "@/components/ui/card";
-import { ClipboardList, FileImage, LayoutDashboard, FileCheck } from "lucide-react";
+import { ClipboardList, FileImage, LayoutDashboard, FileCheck, Mic, Sparkles } from "lucide-react";
 
 const STEPS = [
   {
@@ -28,13 +28,13 @@ const STEPS = [
   {
     id: "photos",
     title: "Photo upload",
-    description: "Snap before/after photos on-site and add notes. Organize by room or area.",
+    description: "Snap before/after photos, dictate notes on-site, and let AI clean them up. Organize by room or area.",
     icon: FileImage,
   },
   {
     id: "report",
     title: "Sealed report",
-    description: "Seal the job to generate a shareable report link for your customer.",
+    description: "Seal the job to generate a shareable report link—with AI summary and cleaned notes for your customer.",
     icon: FileCheck,
   },
 ] as const;
@@ -145,6 +145,21 @@ export function ProductTour({ demoReportToken }: ProductTourProps) {
                       </div>
                     ))}
                   </div>
+                  <div className="rounded-md border bg-background px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+                        aria-label="Dictate note"
+                      >
+                        <Mic className="h-4 w-4" aria-hidden />
+                      </button>
+                      <span className="text-xs italic text-muted-foreground">
+                        …countertops in, backsplash done, final sign-off…
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[10px] text-muted-foreground">Dictate note</p>
+                  </div>
                   <Button size="sm">Add photos</Button>
                 </div>
               )}
@@ -161,8 +176,22 @@ export function ProductTour({ demoReportToken }: ProductTourProps) {
                       Sealed
                     </span>
                   </div>
+                  <div className="rounded-md border bg-muted/10 px-3 py-2">
+                    <div className="mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                      <Sparkles className="h-3 w-3" aria-hidden />
+                      Summary (AI)
+                    </div>
+                    <ul className="list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
+                      <li>Countertops installed</li>
+                      <li>Backsplash complete</li>
+                      <li>Final sign-off pending</li>
+                    </ul>
+                    <p className="mt-2 border-t border-border/50 pt-2 text-xs text-muted-foreground">
+                      Notes: Countertops installed. Backsplash complete. Final sign-off pending.
+                    </p>
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    One link to share — your customer sees before/after, notes, and sign-off.
+                    One link to share — your customer sees before/after, AI summary, notes, and sign-off.
                   </p>
                   {demoReportToken ? (
                     <Button asChild size="sm" variant="outline">

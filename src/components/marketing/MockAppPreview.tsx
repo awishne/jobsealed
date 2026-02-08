@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { FileImage, Link2, FileCheck } from "lucide-react";
+import { FileImage, Link2, FileCheck, Sparkles } from "lucide-react";
 
 export function MockAppPreview({ className }: { className?: string }) {
   return (
@@ -32,14 +32,6 @@ export function MockAppPreview({ className }: { className?: string }) {
           >
             <FileCheck className="h-3 w-3" aria-hidden />
             Sealed
-          </span>
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium",
-              "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:border-amber-400/30 dark:bg-amber-500/15 dark:text-amber-300"
-            )}
-          >
-            In progress
           </span>
         </div>
 
@@ -77,9 +69,16 @@ export function MockAppPreview({ className }: { className?: string }) {
           </div>
         </div>
 
-        {/* Notes */}
+        {/* Notes — Dictate / AI */}
         <div className="rounded-lg border bg-muted/10 px-3 py-2">
-          <p className="text-xs text-muted-foreground">
+          <div className="mb-1.5 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+            <Sparkles className="h-3 w-3" aria-hidden />
+            AI-cleaned notes
+          </div>
+          <p className="text-[10px] italic text-muted-foreground/90">
+            Dictated: countertops in backsplash done final sign off…
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
             Countertops installed. Backsplash complete. Final sign-off pending.
           </p>
         </div>
