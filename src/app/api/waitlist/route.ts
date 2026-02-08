@@ -74,6 +74,23 @@ function getUtmFromRequest(request: Request): Record<string, string | undefined>
   return utm;
 }
 
+async function verifyTurnstile(token: string, ip: string | null): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+  if (!secret) return true;
+  const params = new URLSearchParams();
+  params.set("secret", secret);
+  params.set("response", token);
+  if (ip) params.set("remoteip", ip);
+  const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+  if (!res.ok) return false;
+  const data = (await res.json()) as { success?: boolean };
+  return data.success === true;
+}
+
 export async function POST(request: Request) {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -134,7 +151,29 @@ export async function POST(request: Request) {
     }
   }
 
-  const { email: rawEmail, source } = body as { email?: unknown; source?: unknown };
+  if (process.env.TURNSTILE_SECRET_KEY) {
+    const rawToken = (body as { turnstileToken?: unknown }).turnstileToken;
+    const token = typeof rawToken === "string" ? rawToken.trim() : undefined;
+    if (!token) {
+      return NextResponse.json(
+        { ok: false, error: "missing_captcha" },
+        { status: 400 }
+      );
+    }
+    const verified = await verifyTurnstile(token, ip);
+    if (!verified) {
+      return NextResponse.json(
+        { ok: false, error: "captcha_failed" },
+        { status: 400 }
+      );
+    }
+  }
+
+  const { email: rawEmail, source } = body as {
+    email?: unknown;
+    source?: unknown;
+    turnstileToken?: string;
+  };
   if (!validateEmail(rawEmail)) {
     return NextResponse.json(
       { ok: false, error: "Invalid email" },

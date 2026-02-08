@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +12,27 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+const TURNSTILE_SCRIPT = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback?: (token: string) => void;
+          "expired-callback"?: () => void;
+          "error-callback"?: () => void;
+        }
+      ) => string;
+      remove?: (widgetId: string) => void;
+      reset?: (widgetId: string) => void;
+    };
+  }
+}
 
 interface ProWaitlistDialogProps {
   title?: string;
@@ -37,6 +59,10 @@ export function ProWaitlistDialog({
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileScriptLoaded, setTurnstileScriptLoaded] = useState(false);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
 
   const UTM_PARAMS = [
     "utm_source",
@@ -45,6 +71,54 @@ export function ProWaitlistDialog({
     "utm_content",
     "utm_term",
   ] as const;
+
+  // Render Turnstile when dialog is open and script is loaded. Use ref for widget id to avoid
+  // state-driven re-renders that can prevent the widget from showing after close + reopen.
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || !open || !turnstileScriptLoaded || !turnstileContainerRef.current || typeof window === "undefined" || !window.turnstile) return;
+
+    const existingId = turnstileWidgetIdRef.current;
+    if (existingId != null) {
+      try {
+        window.turnstile.remove?.(existingId);
+      } catch {
+        // ignore
+      }
+      turnstileWidgetIdRef.current = null;
+    }
+    turnstileContainerRef.current.innerHTML = "";
+    setTurnstileToken("");
+
+    const id = window.turnstile.render(turnstileContainerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      callback: (token) => setTurnstileToken(token),
+      "expired-callback": () => setTurnstileToken(""),
+      "error-callback": () => setTurnstileToken(""),
+    });
+    turnstileWidgetIdRef.current = id;
+
+    return () => {
+      const idToRemove = turnstileWidgetIdRef.current;
+      if (idToRemove != null) {
+        try {
+          window.turnstile?.remove?.(idToRemove);
+        } catch {
+          // ignore
+        }
+        turnstileWidgetIdRef.current = null;
+      }
+      if (turnstileContainerRef.current) turnstileContainerRef.current.innerHTML = "";
+      setTurnstileToken("");
+    };
+  }, [open, turnstileScriptLoaded]);
+
+  // When dialog opens, mark script as loaded if Turnstile is already on window (cached/already loaded).
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || !open) return;
+    if (typeof window !== "undefined" && window.turnstile) {
+      setTurnstileScriptLoaded(true);
+    }
+  }, [open]);
 
   function buildWaitlistUrl(): string {
     if (typeof window === "undefined") return "/api/waitlist";
@@ -60,15 +134,27 @@ export function ProWaitlistDialog({
     const trimmed = email.trim();
     if (!trimmed) return;
 
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setErrorMessage("Please complete the verification.");
+      setStatus("error");
+      return;
+    }
+
     setStatus("loading");
     setErrorMessage("");
 
     try {
       const url = buildWaitlistUrl();
+      const body: { email: string; source?: string; turnstileToken?: string } = {
+        email: trimmed,
+        source: source ?? undefined,
+      };
+      if (turnstileToken) body.turnstileToken = turnstileToken;
+
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed, source: source ?? undefined }),
+        body: JSON.stringify(body),
       });
 
       const data = (await res.json()) as {
@@ -80,6 +166,10 @@ export function ProWaitlistDialog({
       if (!res.ok) {
         if (res.status === 429) {
           setErrorMessage("Too many attempts. Please try again in a few minutes.");
+        } else if (data?.error === "missing_captcha") {
+          setErrorMessage("Please complete the verification.");
+        } else if (data?.error === "captcha_failed") {
+          setErrorMessage("Verification failed. Please try again.");
         } else {
           setErrorMessage(data?.error ?? "Something went wrong. Please try again.");
         }
@@ -89,10 +179,12 @@ export function ProWaitlistDialog({
 
       if (data.ok && data.status === "already_joined") {
         setStatus("already_joined");
+        setTurnstileToken("");
         return;
       }
 
       setStatus("joined");
+      setTurnstileToken("");
     } catch {
       setErrorMessage("Something went wrong. Please try again.");
       setStatus("error");
@@ -120,6 +212,14 @@ export function ProWaitlistDialog({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
+        {TURNSTILE_SITE_KEY && (
+          <Script
+            src={TURNSTILE_SCRIPT}
+            strategy="afterInteractive"
+            onLoad={() => setTurnstileScriptLoaded(true)}
+            onReady={() => setTurnstileScriptLoaded(true)}
+          />
+        )}
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
@@ -149,6 +249,9 @@ export function ProWaitlistDialog({
               autoComplete="email"
               required
             />
+            {TURNSTILE_SITE_KEY && (
+              <div ref={turnstileContainerRef} className="flex justify-center [&_.cf-turnstile]:inline-block" />
+            )}
             {status === "error" && errorMessage && (
               <p className="text-sm text-destructive">{errorMessage}</p>
             )}
