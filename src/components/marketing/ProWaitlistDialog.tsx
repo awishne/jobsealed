@@ -77,6 +77,7 @@ export function ProWaitlistDialog({
   useEffect(() => {
     if (!TURNSTILE_SITE_KEY || !open || !turnstileScriptLoaded || !turnstileContainerRef.current || typeof window === "undefined" || !window.turnstile) return;
 
+    const containerEl = turnstileContainerRef.current;
     const existingId = turnstileWidgetIdRef.current;
     if (existingId != null) {
       try {
@@ -86,10 +87,10 @@ export function ProWaitlistDialog({
       }
       turnstileWidgetIdRef.current = null;
     }
-    turnstileContainerRef.current.innerHTML = "";
-    setTurnstileToken("");
+    containerEl.innerHTML = "";
+    queueMicrotask(() => setTurnstileToken(""));
 
-    const id = window.turnstile.render(turnstileContainerRef.current, {
+    const id = window.turnstile.render(containerEl, {
       sitekey: TURNSTILE_SITE_KEY,
       callback: (token) => setTurnstileToken(token),
       "expired-callback": () => setTurnstileToken(""),
@@ -107,8 +108,8 @@ export function ProWaitlistDialog({
         }
         turnstileWidgetIdRef.current = null;
       }
-      if (turnstileContainerRef.current) turnstileContainerRef.current.innerHTML = "";
-      setTurnstileToken("");
+      if (containerEl) containerEl.innerHTML = "";
+      queueMicrotask(() => setTurnstileToken(""));
     };
   }, [open, turnstileScriptLoaded]);
 
@@ -116,7 +117,7 @@ export function ProWaitlistDialog({
   useEffect(() => {
     if (!TURNSTILE_SITE_KEY || !open) return;
     if (typeof window !== "undefined" && window.turnstile) {
-      setTurnstileScriptLoaded(true);
+      queueMicrotask(() => setTurnstileScriptLoaded(true));
     }
   }, [open]);
 

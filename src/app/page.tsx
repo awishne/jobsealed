@@ -10,8 +10,12 @@ import {
 } from "@/components/ui/card";
 import { Camera, FileCheck, Share2 } from "lucide-react";
 import Link from "next/link";
+import { MockAppPreview } from "@/components/marketing/MockAppPreview";
+import { ProductTour } from "@/components/marketing/ProductTour";
+import { ProWaitlistDialog } from "@/components/marketing/ProWaitlistDialog";
 
 const DEMO = process.env.NEXT_PUBLIC_DEMO_REPORT_TOKEN;
+const ENABLE_SIGNUPS = process.env.NEXT_PUBLIC_ENABLE_SIGNUPS === "true";
 
 export default async function Home() {
   return (
@@ -19,40 +23,57 @@ export default async function Home() {
       <SiteHeader variant="home" />
 
       <div className="mx-auto max-w-5xl px-6">
-        {/* Hero */}
+        {/* Hero: two-column on lg, stack on mobile */}
         <section className="py-10 sm:py-14">
-          <div className="flex flex-col items-start gap-5">
-            <Badge variant="secondary">Job Closeout for Trades</Badge>
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-center lg:gap-12">
+            <div className="flex flex-1 flex-col items-start gap-5">
+              <Badge variant="secondary">Job Closeout for Trades</Badge>
 
-            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-              <span className="js-word-left">Job</span><span className="js-word-right">Sealed</span>
-            </h1>
+              <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+                <span className="js-word-left">Job</span>
+                <span className="js-word-right">Sealed</span>
+              </h1>
 
-            <p className="max-w-2xl text-lg text-muted-foreground">
-              Create a clean before/after closeout report in minutes—photos,
-              notes, and a shareable link your customer can&apos;t ignore.
-            </p>
+              <p className="max-w-2xl text-lg text-muted-foreground">
+                Create a clean before/after closeout report in minutes—photos,
+                notes, and a shareable link your customer can&apos;t ignore.
+              </p>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href="/dashboard">Start a new job</Link>
-              </Button>
-              {DEMO ? (
-                <Button asChild size="lg" variant="outline">
-                  <Link href={`/r/${DEMO}`}>
-                    See an example report
-                  </Link>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Button asChild size="lg">
+                  <Link href="/dashboard">Start a new job</Link>
                 </Button>
-              ) : (
-                <div className="flex flex-col gap-1">
-                  <Button size="lg" variant="outline" disabled>
-                    See an example report
+                {ENABLE_SIGNUPS ? (
+                  <Button asChild size="lg" variant="secondary">
+                    <Link href="/signup">Sign up</Link>
                   </Button>
-                  <p className="text-xs text-muted-foreground">
-                    Demo report coming soon
-                  </p>
-                </div>
-              )}
+                ) : (
+                  <ProWaitlistDialog
+                    title="Join Early Access"
+                    triggerLabel="Join Early Access"
+                    triggerVariant="secondary"
+                    triggerSize="lg"
+                    source="home_hero"
+                  />
+                )}
+                {DEMO ? (
+                  <Button asChild size="lg" variant="outline">
+                    <Link href={`/r/${DEMO}`}>See an example report</Link>
+                  </Button>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    <Button size="lg" variant="outline" disabled>
+                      See an example report
+                    </Button>
+                    <p className="text-xs text-muted-foreground">
+                      Demo report coming soon
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="w-full lg:max-w-md lg:shrink-0">
+              <MockAppPreview />
             </div>
           </div>
         </section>
@@ -103,48 +124,37 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* How it works */}
+        {/* How it works — interactive product tour */}
+        <ProductTour demoReportToken={DEMO ?? null} />
+
+        {/* Bottom CTA band */}
         <section className="py-10">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            How it works
-          </h2>
-          <ol className="mt-6 grid gap-6 sm:grid-cols-3">
-            <li className="flex gap-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-                1
-              </span>
-              <div>
-                <h3 className="font-medium">Create a job</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Add the job title and customer. You can start from the
-                  dashboard.
-                </p>
-              </div>
-            </li>
-            <li className="flex gap-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-                2
-              </span>
-              <div>
-                <h3 className="font-medium">Add photos and notes</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Upload before/after photos and add any closeout notes on-site.
-                </p>
-              </div>
-            </li>
-            <li className="flex gap-4">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-                3
-              </span>
-              <div>
-                <h3 className="font-medium">Seal and share</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Seal the job to generate a report link. Send it to your
-                  customer—done.
-                </p>
-              </div>
-            </li>
-          </ol>
+          <div className="rounded-xl border bg-card px-6 py-8 text-center sm:px-8 sm:py-10">
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Ready to close out jobs the right way?
+            </h2>
+            <p className="mx-auto mt-2 max-w-md text-muted-foreground">
+              Start a new job in seconds, or join early access for the full experience.
+            </p>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+              <Button asChild size="lg">
+                <Link href="/dashboard">Start a new job</Link>
+              </Button>
+              {ENABLE_SIGNUPS ? (
+                <Button asChild size="lg" variant="secondary">
+                  <Link href="/signup">Sign up</Link>
+                </Button>
+              ) : (
+                <ProWaitlistDialog
+                  title="Join Early Access"
+                  triggerLabel="Join Early Access"
+                  triggerVariant="secondary"
+                  triggerSize="lg"
+                  source="home_bottom"
+                />
+              )}
+            </div>
+          </div>
         </section>
 
         {/* Footer */}

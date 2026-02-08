@@ -252,7 +252,7 @@ export function ProfileForm({
           <CardHeader>
             <CardTitle>Review Link (Optional)</CardTitle>
             <CardDescription>
-              Add your Google Business (or Yelp) review link. Customers will see a 'Leave a review' button on every report.
+              Add your Google Business (or Yelp) review link. Customers will see a &apos;Leave a review&apos; button on every report.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
